@@ -3,9 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="ali.company.camdetector">
 
-
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:allowBackup="true"
@@ -17,8 +16,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CamDetector">
         <activity
-            android:name=".helpers.ImageHelperActivity"
+            android:name=".text.SpamDetectionActivity"
             android:exported="false" />
+        <activity android:name=".audio.AudioClassificationActivity" />
+        <activity
+            android:name=".image.imageClassificationActivity"
+            android:exported="false" />
+        <activity android:name=".image.FlowerIdentificationActivity" />
+        <activity android:name=".image.ObjectDetectionActivity" />
+        <activity android:name=".image.FaceDetectionActivity" />
+        <activity android:name=".audio.BirdSoundIdentifierActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -28,6 +35,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.iago.fileprovider"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fileprovider" />
+        </provider>
     </application>
 
 </manifest>
