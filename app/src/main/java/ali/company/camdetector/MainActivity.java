@@ -2,68 +2,135 @@ package ali.company.camdetector;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+
+
+import java.util.ArrayList;
+import java.util.List;
 
 import ali.company.camdetector.audio.AudioClassificationActivity;
 import ali.company.camdetector.audio.BirdSoundIdentifierActivity;
-import ali.company.camdetector.helpers.AudioHelperActivity;
-import ali.company.camdetector.helpers.ImageHelperActivity;
-import ali.company.camdetector.helpers.TextHelperActivity;
 import ali.company.camdetector.image.FaceDetectionActivity;
 import ali.company.camdetector.image.FlowerIdentificationActivity;
 import ali.company.camdetector.image.ObjectDetectionActivity;
 import ali.company.camdetector.image.imageClassificationActivity;
 import ali.company.camdetector.text.SpamDetectionActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AlgoListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-    }
-    public void onGoToImageActivity (View view){
 
-        Intent intent = new Intent(this, imageClassificationActivity.class);
+        ArrayList<Algo> arrayList = new ArrayList<>();
+        arrayList.add(new Algo(R.drawable.baseline_image_black_48, "Image Classification", imageClassificationActivity.class));
+        arrayList.add(new Algo(R.drawable.baseline_filter_vintage_black_48, "Flower Identification", FlowerIdentificationActivity.class));
+        arrayList.add(new Algo(R.drawable.baseline_center_focus_strong_black_48, "Object detection", ObjectDetectionActivity.class));
+        arrayList.add(new Algo(R.drawable.baseline_portrait_black_48, "Face detection", FaceDetectionActivity.class));
+        arrayList.add(new Algo(R.drawable.baseline_music_note_black_48, "Audio Classification", AudioClassificationActivity.class));
+        arrayList.add(new Algo(R.drawable.baseline_flutter_dash_black_48, "Bird Sound Identifier", BirdSoundIdentifierActivity.class));
+        arrayList.add(new Algo(R.drawable.baseline_comment_black_48, "Spam Text Detector", SpamDetectionActivity.class));
+//        arrayList.add(new Algo(R.drawable.baseline_time_to_leave_black_48, "Driver Drowsiness Detector", DriverDrowsinessDetectionActivity.class));
+//        arrayList.add(new Algo(R.drawable.baseline_accessibility_black_48, "Pose Detection", PoseDetectionActivity.class));
+//        arrayList.add(new Algo(R.drawable.baseline_portrait_black_48, "Visitor Analysis", VisitorAnalysisActivity.class));
+//        arrayList.add(new Algo(R.drawable.baseline_portrait_black_48, "Face recognition", FaceRecognitionActivity.class));
+//        arrayList.add(new Algo(R.drawable.baseline_portrait_black_48, "Hide/Obscure Face", ObscureFaceActivity.class));
+
+        AlgoAdapter algoAdapter = new AlgoAdapter(arrayList, this);
+        RecyclerView recyclerView = findViewById(R.id.main_recycler_view);
+        recyclerView.setAdapter(algoAdapter);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+    }
+
+    @Override
+    public void onAlgoSelected(Algo algo) {
+        Intent intent = new Intent(this, algo.activityClazz);
+        intent.putExtra("name", algo.algoText);
         startActivity(intent);
     }
+}
 
-    public void onGoToFlowerIdentification(View view){
+class AlgoAdapter extends RecyclerView.Adapter<AlgoViewHolder> {
 
-        Intent intent = new Intent(this, FlowerIdentificationActivity.class);
-        startActivity(intent);
+    private List<Algo> algoList;
+    private AlgoListener algoListener;
+
+    public AlgoAdapter(List<Algo> algoList, AlgoListener listener) {
+        this.algoList = algoList;
+        this.algoListener = listener;
     }
-    public void onGoToObjectDetection(View view){
 
-        Intent intent = new Intent(this, ObjectDetectionActivity.class);
-        startActivity(intent);
+    @NonNull
+    @Override
+    public AlgoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_icons, parent, false);
+        return new AlgoViewHolder(view, algoListener);
     }
 
-    public void onGoToFaceDetection(View view){
-
-        Intent intent = new Intent(this, FaceDetectionActivity.class);
-        startActivity(intent);
+    @Override
+    public void onBindViewHolder(@NonNull AlgoViewHolder holder, int position) {
+        holder.bind(algoList.get(position));
     }
-    public void onGoToAudioClassification(View view){
 
-        Intent intent = new Intent(this, AudioClassificationActivity.class);
-        startActivity(intent);
+    @Override
+    public int getItemCount() {
+        return algoList.size();
     }
-    public void onGoToBirdSoundIdentifier(View view){
+}
 
-        Intent intent = new Intent(this, BirdSoundIdentifierActivity.class);
-        startActivity(intent);
-    }
-    public void onGoToSpamDetection(View view){
+class AlgoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        Intent intent = new Intent(this, SpamDetectionActivity.class);
-        startActivity(intent);
+    private ImageView iconImageView;
+    private TextView algoTextView;
+    private AlgoListener algoListener;
+    private Algo algo;
+
+    public AlgoViewHolder(@NonNull View itemView, AlgoListener algoListener) {
+        super(itemView);
+        itemView.setOnClickListener(this);
+        this.algoListener = algoListener;
+
+        iconImageView = itemView.findViewById(R.id.iconImageView);
+        algoTextView = itemView.findViewById(R.id.algoTextView);
     }
+
+    public void bind(Algo algo) {
+        this.algo = algo;
+        iconImageView.setImageResource(algo.iconResourceId);
+        algoTextView.setText(algo.algoText);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (algoListener != null) {
+            algoListener.onAlgoSelected(algo);
+        }
+    }
+}
+
+class Algo<T extends imageClassificationActivity> {
+    public int iconResourceId = R.drawable.ic_launcher_foreground;
+    public String algoText = "";
+    public Class<T> activityClazz;
+
+    public Algo(int iconResourceId, String algoText, Class<T> activityClazz) {
+        this.iconResourceId = iconResourceId;
+        this.algoText = algoText;
+        this.activityClazz = activityClazz;
+    }
+}
+
+interface AlgoListener {
+    void onAlgoSelected(Algo algo);
 }
