@@ -41,7 +41,6 @@ public abstract class CDImageHelperActivity extends AppCompatActivity {
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
     public final static int PICK_IMAGE_ACTIVITY_REQUEST_CODE = 1064;
     public final static int REQUEST_READ_EXTERNAL_STORAGE = 2031;
-    private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
 
     File photoFile;
 
