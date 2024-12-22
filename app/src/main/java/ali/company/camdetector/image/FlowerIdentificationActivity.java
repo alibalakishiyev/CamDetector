@@ -35,7 +35,7 @@ public class FlowerIdentificationActivity extends imageClassificationActivity {
     }
 
     @Override
-    protected void runClassificatior(Bitmap bitmap) {
+    protected void runDetection(Bitmap bitmap) {
         InputImage inputImage = InputImage.fromBitmap(bitmap,0);
         imageLabeler.process(inputImage).addOnSuccessListener(new OnSuccessListener<List<ImageLabel>>() {
             @Override

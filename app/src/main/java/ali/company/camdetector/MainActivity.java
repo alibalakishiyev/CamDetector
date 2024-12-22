@@ -20,10 +20,15 @@ import java.util.List;
 
 import ali.company.camdetector.audio.AudioClassificationActivity;
 import ali.company.camdetector.audio.BirdSoundIdentifierActivity;
-import ali.company.camdetector.image.FaceDetectionActivity;
+import ali.company.camdetector.object.DriverDrowsinessDetectionActivity;
+import ali.company.camdetector.object.FaceDetectionActivity;
 import ali.company.camdetector.image.FlowerIdentificationActivity;
-import ali.company.camdetector.image.ObjectDetectionActivity;
 import ali.company.camdetector.image.imageClassificationActivity;
+import ali.company.camdetector.object.FaceRecognitionActivity;
+import ali.company.camdetector.object.ObjectDetectionActivity;
+import ali.company.camdetector.object.ObscureFaceActivity;
+import ali.company.camdetector.object.PoseDetectionActivity;
+import ali.company.camdetector.object.VisitorAnalysisActivity;
 import ali.company.camdetector.text.SpamDetectionActivity;
 
 public class MainActivity extends AppCompatActivity implements AlgoListener {
@@ -41,11 +46,11 @@ public class MainActivity extends AppCompatActivity implements AlgoListener {
         arrayList.add(new Algo(R.drawable.baseline_music_note_black_48, "Audio Classification", AudioClassificationActivity.class));
         arrayList.add(new Algo(R.drawable.baseline_flutter_dash_black_48, "Bird Sound Identifier", BirdSoundIdentifierActivity.class));
         arrayList.add(new Algo(R.drawable.baseline_comment_black_48, "Spam Text Detector", SpamDetectionActivity.class));
-//        arrayList.add(new Algo(R.drawable.baseline_time_to_leave_black_48, "Driver Drowsiness Detector", DriverDrowsinessDetectionActivity.class));
-//        arrayList.add(new Algo(R.drawable.baseline_accessibility_black_48, "Pose Detection", PoseDetectionActivity.class));
-//        arrayList.add(new Algo(R.drawable.baseline_portrait_black_48, "Visitor Analysis", VisitorAnalysisActivity.class));
-//        arrayList.add(new Algo(R.drawable.baseline_portrait_black_48, "Face recognition", FaceRecognitionActivity.class));
-//        arrayList.add(new Algo(R.drawable.baseline_portrait_black_48, "Hide/Obscure Face", ObscureFaceActivity.class));
+        arrayList.add(new Algo(R.drawable.baseline_time_to_leave_black_48, "Driver Drowsiness Detector", DriverDrowsinessDetectionActivity.class));
+        arrayList.add(new Algo(R.drawable.baseline_accessibility_black_48, "Pose Detection", PoseDetectionActivity.class));
+        arrayList.add(new Algo(R.drawable.baseline_portrait_black_48, "Visitor Analysis", VisitorAnalysisActivity.class));
+        arrayList.add(new Algo(R.drawable.baseline_portrait_black_48, "Face recognition", FaceRecognitionActivity.class));
+        arrayList.add(new Algo(R.drawable.baseline_portrait_black_48, "Hide/Obscure Face", ObscureFaceActivity.class));
 
         AlgoAdapter algoAdapter = new AlgoAdapter(arrayList, this);
         RecyclerView recyclerView = findViewById(R.id.main_recycler_view);

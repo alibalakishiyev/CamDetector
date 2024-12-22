@@ -15,9 +15,9 @@ import com.google.mlkit.vision.label.defaults.ImageLabelerOptions;
 
 import java.util.List;
 
-import ali.company.camdetector.helpers.ImageHelperActivity;
+import ali.company.camdetector.helpers.CDImageHelperActivity;
 
-public class imageClassificationActivity extends ImageHelperActivity {
+public class imageClassificationActivity extends CDImageHelperActivity {
 
     private ImageLabeler imageLabeler;
 
@@ -33,7 +33,7 @@ public class imageClassificationActivity extends ImageHelperActivity {
     }
 
     @Override
-    protected void runClassificatior(Bitmap bitmap) {
+    protected void runDetection(Bitmap bitmap) {
         InputImage inputImage = InputImage.fromBitmap(bitmap,0);
         imageLabeler.process(inputImage).addOnSuccessListener(new OnSuccessListener<List<ImageLabel>>() {
             @Override
