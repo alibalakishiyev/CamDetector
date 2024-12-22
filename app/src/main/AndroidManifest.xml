@@ -4,10 +4,12 @@
     package="ali.company.camdetector">
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+
+    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG"
+        tools:ignore="ProtectedPermissions" />
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-    <uses-feature android:name="android.hardware.camera" android:required="false"/>
-
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
@@ -63,7 +65,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.iago.fileprovider1"
+            android:authorities="ali.company.camdetector.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

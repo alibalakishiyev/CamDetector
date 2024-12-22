@@ -23,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.exifinterface.media.ExifInterface;
 
@@ -32,17 +34,22 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import ali.company.camdetector.R;
 
 public abstract class CDImageHelperActivity extends AppCompatActivity {
 
-    public final String LOG_TAG = "CDImageHelper";
+    public final String LOG_TAG = "CDImage";
+    public final String FILE_NAME = "image";
+
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
     public final static int PICK_IMAGE_ACTIVITY_REQUEST_CODE = 1064;
     public final static int REQUEST_READ_EXTERNAL_STORAGE = 2031;
+    private static final int REQUEST_CAMERA_PERMISSION = 100;
 
     File photoFile;
+    private Uri photoUri;
 
     private ImageView inputImageView;
     private TextView outputTextView;
@@ -68,45 +75,51 @@ public abstract class CDImageHelperActivity extends AppCompatActivity {
 
     }
 
-    public void onTakeImage(View view) {
-        // create Intent to take a picture and return control to the calling application
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Create a File reference for future access
-        photoFile = getPhotoFileUri(new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg");
 
-        // wrap File object into a content provider
-        // required for API >= 24
-        // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
-        Uri fileProvider = FileProvider.getUriForFile(this, "com.iago.fileprovider1", photoFile);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
-        // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
-        // So as long as the result is not null, it's safe to use the intent.
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+    public void onTakeImage(View view) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
         } else {
-            Toast.makeText(this, "Kamera tətbiqi tapılmadı!", Toast.LENGTH_SHORT).show();
+            startCamera();
+        }
+    }
+
+    private void startCamera() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            try {
+                photoFile = getPhotoFileUri();
+                if (photoFile != null) {
+                    photoUri = FileProvider.getUriForFile(
+                            this,
+                            "ali.company.camdetector.fileprovider", // authority adını burada qeyd edin
+                            photoFile
+                    );
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                    startActivityForResult(takePictureIntent, REQUEST_CAMERA_PERMISSION);
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
 
 
     // Returns the File for a photo stored on disk given the fileName
-    public File getPhotoFileUri(String fileName) {
-        // Get safe storage directory for photos
-        // Use `getExternalFilesDir` on Context to access package-specific directories.
-        // This way, we don't need to request external read/write runtime permissions.
+    private File getPhotoFileUri() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String fileName = "IMG_" + timeStamp + ".jpg";
+
         File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), LOG_TAG);
 
-        // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
-            Log.d(LOG_TAG, "failed to create directory");
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
+            throw new IOException("Failed to create directory");
         }
 
-        // Return the file target for the photo based on filename
-        File file = new File(mediaStorageDir.getPath() + File.separator + fileName);
-
-        return file;
+        return new File(mediaStorageDir, fileName);
     }
+
 
     /**
      * getCapturedImage():
@@ -203,28 +216,30 @@ public abstract class CDImageHelperActivity extends AppCompatActivity {
         return image;
     }
 
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                Bitmap bitmap = getCapturedImage();
-                rotateIfRequired(bitmap);
-                inputImageView.setImageBitmap(bitmap);
-                runDetection(bitmap);
-            } else { // Result was a failure
+                Bitmap bitmap = getCapturedImage();  // Şəkil ölçülərini optimallaşdır
+                rotateIfRequired(bitmap);  // Əgər şəkil dönməli olsa, dön
+                inputImageView.setImageBitmap(bitmap);  // Şəkili ImageView-da göstər
+                runDetection(bitmap);  // Şəkil üzərində tanıma əməliyyatını həyata keçir
+            } else {
                 Toast.makeText(this, "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == PICK_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                Bitmap takenImage = loadFromUri(data.getData());
-                inputImageView.setImageBitmap(takenImage);
-                runDetection(takenImage);
-            } else { // Result was a failure
+                Bitmap takenImage = loadFromUri(data.getData());  // Şəkili URI-dən yüklə
+                inputImageView.setImageBitmap(takenImage);  // Şəkili ImageView-da göstər
+                runDetection(takenImage);  // Şəkil üzərində tanıma əməliyyatını həyata keçir
+            } else {
                 Toast.makeText(this, "Picture wasn't selected!", Toast.LENGTH_SHORT).show();
             }
         }
     }
+
 
     /**
      * Draw bounding boxes around objects together with the object's name.
